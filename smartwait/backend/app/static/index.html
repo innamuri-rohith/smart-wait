@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Wait - Intelligent Queue Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --primary-light: #e0f2fe;
+      --primary-soft: #f0f9ff;
+      --accent: #2563eb;
+      --success: #10b981;
+      --success-light: #ecfdf5;
+      --warning: #f59e0b;
+      --warning-light: #fffbeb;
+      --danger: #ef4444;
+      --slate-50: #f8fafc;
+      --slate-100: #f1f5f9;
+      --slate-200: #e2e8f0;
+      --slate-300: #cbd5e1;
+      --slate-600: #475569;
+      --slate-700: #334155;
+      --slate-800: #1e293b;
+      --slate-900: #0f172a;
+      --card-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.08), 0 8px 10px -6px rgba(2, 132, 199, 0.04);
+      --hover-shadow: 0 20px 30px -10px rgba(2, 132, 199, 0.16);
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background: #f0f6ff;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(37, 99, 235, 0.08) 0px, transparent 50%);
+      color: var(--slate-800);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Header */
+    header {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 80px;
+    }
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 6px 16px rgba(2, 132, 199, 0.3);
+    }
+    .brand-text h1 {
+      font-size: 1.55rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .brand-text h1 span { color: #0284c7; }
+    .brand-text p {
+      font-size: 0.82rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+    .header-tagline {
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: #0369a1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+    }
+    .header-tagline span {
+      position: relative;
+    }
+    .header-tagline span::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, #0284c7, #38bdf8);
+      border-radius: 2px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .badge-pill {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1d4ed8;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sound-btn {
+      background: #fff;
+      border: 1px solid var(--slate-200);
+      color: var(--slate-700);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .sound-btn:hover { background: var(--slate-50); border-color: var(--slate-300); }
+
+    /* Section Headers */
+    .section-title {
+      display: inline-block;
+      background: #0f172a;
+      color: #fff;
+      font-size: 1.15rem;
+      font-weight: 700;
+      padding: 10px 24px;
+      border-radius: 12px;
+      margin: 32px 0 20px;
+      letter-spacing: -0.01em;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    }
+
+    /* 5-Step Customer Workflow Grid */
+    .steps-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .step-card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      border: 1px solid #e2e8f0;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    .step-card:hover {
+      box-shadow: var(--hover-shadow);
+      transform: translateY(-3px);
+      border-color: #cbd5e1;
+    }
+    .step-card.active-step {
+      border: 2px solid #0284c7;
+      box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15), var(--hover-shadow);
+    }
+
+    .step-header {
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid #f1f5f9;
+      background: #fafcff;
+    }
+    .step-num-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .step-badge {
+      width: 26px;
+      height: 26px;
+      background: #0284c7;
+      color: #fff;
+      border-radius: 50%;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-desc {
+      font-size: 0.76rem;
+      color: #64748b;
+      margin-top: 4px;
+      line-height: 1.35;
+    }
+
+    .step-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      justify-content: space-between;
+    }
+
+    /* Card 1: Visit Website Hero */
+    .hero-card-inner {
+      background: #f8fbff;
+      border: 1px solid #e0f2fe;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .hero-mini-title {
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.25;
+      margin-bottom: 6px;
+    }
+    .hero-mini-title span { color: #0284c7; }
+    .hero-mini-p {
+      font-size: 0.78rem;
+      color: #64748b;
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+    .avatar-queue-cluster {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: -8px;
+      margin: 12px 0;
+      padding: 12px 0;
+    }
+    .avatar-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+      margin-left: -10px;
+    }
+    .avatar-1 { background: #fee2e2; }
+    .avatar-2 { background: #dbeafe; }
+    .avatar-3 { background: #fef3c7; }
+    .avatar-4 { background: #dcfce7; }
+
+    .btn-action {
+      background: #0284c7;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      transition: all 0.2s;
+    }
+    .btn-action:hover { background: #0369a1; transform: translateY(-1px); }
+
+    /* Card 2: Available Services */
+    .service-item-box {
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+    .service-item-box:hover {
+      border-color: #0284c7;
+      background: #f8fbff;
+    }
+    .service-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .service-icon-wrap {
+      width: 34px;
+      height: 34px;
+      background: #eff6ff;
+      color: #0284c7;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+    .service-meta h4 {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+    .service-meta span {
+      font-size: 0.72rem;
+      color: #64748b;
+    }
+    .btn-join {
+      background: #0284c7;
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .btn-join:hover { background: #0369a1; }
+
+    /* Card 3: Token Generated */
+    .token-success-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ecfdf5;
+      color: #059669;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin: 0 auto 12px;
+    }
+    .token-ticket-display {
+      background: #eff6ff;
+      border: 2px dashed #93c5fd;
+      border-radius: 16px;
+      padding: 16px 10px;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+    .ticket-code {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: #0369a1;
+      letter-spacing: 2px;
+      line-height: 1;
+    }
+    .ticket-meta-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: #334155;
+      margin-bottom: 14px;
+    }
+    .meta-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+
+    /* Card 4: Circular Real-time Tracker */
+    .status-card-inner {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .gauge-wrapper {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      margin: 6px auto 12px;
+    }
+    .gauge-svg {
+      transform: rotate(-90deg);
+      width: 140px;
+      height: 140px;
+    }
+    .gauge-bg {
+      fill: none;
+      stroke: #e2e8f0;
+      stroke-width: 10;
+    }
+    .gauge-progress {
+      fill: none;
+      stroke: #0284c7;
+      stroke-width: 10;
+      stroke-linecap: round;
+      stroke-dasharray: 377;
+      stroke-dashoffset: 120;
+      transition: stroke-dashoffset 0.8s ease;
+    }
+    .gauge-center-content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .gauge-num {
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1;
+    }
+    .gauge-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #64748b;
+      margin-top: 2px;
+    }
+    .eta-pill {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #0f172a;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .notify-banner {
+      background: #eff6ff;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 0.76rem;
+      color: #1e40af;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    /* Card 5: Turn Call Notification */
+    .turn-card-inner {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: var(--radius-md);
+      padding: 16px 12px;
+      text-align: center;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .bell-ring-icon {
+      width: 64px;
+      height: 64px;
+      background: #10b981;
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      box-shadow: 0 0 0 10px rgba(16, 185, 129, 0.15);
+      animation: bellPulse 1.8s infinite;
+      margin-bottom: 12px;
+    }
+    @keyframes bellPulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      70% { transform: scale(1.05); box-shadow: 0 0 0 16px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    .turn-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #065f46;
+      margin-bottom: 4px;
+    }
+    .turn-sub {
+      font-size: 0.85rem;
+      color: #047857;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .btn-counter-proceed {
+      background: #10b981;
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.2s;
+    }
+    .btn-counter-proceed:hover { background: #059669; }
+
+    /* Admin Section */
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1.35fr 1fr 1.5fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .admin-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      flex-direction: column;
+    }
+    .admin-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .admin-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .admin-card-num {
+      width: 24px;
+      height: 24px;
+      background: #0284c7;
+      color: #fff;
+      border-radius: 50%;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Counter Table & Queue Table */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+    }
+    .styled-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+    .styled-table th {
+      text-align: left;
+      padding: 8px 10px;
+      color: #64748b;
+      font-weight: 700;
+      border-bottom: 1px solid #e2e8f0;
+      background: #f8fafc;
+    }
+    .styled-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #1e293b;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .status-badge.active { background: #ecfdf5; color: #059669; }
+    .status-badge.paused { background: #fffbeb; color: #d97706; }
+    .status-badge.waiting { background: #fef3c7; color: #b45309; }
+    .status-badge.serving { background: #dbeafe; color: #1d4ed8; }
+    .status-badge.served { background: #ecfdf5; color: #059669; }
+    .status-badge.skipped { background: #f1f5f9; color: #64748b; }
+
+    .btn-xs {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #0284c7;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-xs:hover { background: #dbeafe; }
+
+    /* Admin: Call Next Customer Console */
+    .calling-console {
+      background: #0f172a;
+      border-radius: 16px;
+      padding: 16px;
+      color: #fff;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+    }
+    .calling-sub {
+      color: #94a3b8;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .calling-token {
+      font-size: 2.6rem;
+      font-weight: 800;
+      color: #38bdf8;
+      margin: 10px 0;
+      letter-spacing: 2px;
+    }
+    .speaker-wave-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #38bdf8;
+      border-radius: 50%;
+      width: 42px;
+      height: 42px;
+      margin: 0 auto 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .speaker-wave-btn:hover { background: rgba(56, 189, 248, 0.2); transform: scale(1.08); }
+    .btn-call-next {
+      background: #0284c7;
+      color: #fff;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+    }
+    .btn-call-next:hover { background: #0369a1; }
+    .call-controls-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .btn-secondary-action {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-secondary-action:hover { background: rgba(255,255,255,0.2); }
+
+    /* Analytics Chart */
+    .analytics-chart-wrap {
+      width: 100%;
+      height: 130px;
+      margin-top: 8px;
+    }
+    .metrics-summary-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .metric-pill {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 6px 8px;
+      text-align: center;
+    }
+    .metric-pill small { font-size: 0.68rem; color: #64748b; display: block; }
+    .metric-pill strong { font-size: 0.92rem; color: #0f172a; font-weight: 800; }
+
+    /* Key Features Row */
+    .features-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .features-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .features-list li {
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .check-icon {
+      color: #10b981;
+      font-size: 1rem;
+    }
+
+    /* Bottom Banner */
+    .bottom-banner {
+      background: #0f172a;
+      color: #fff;
+      padding: 24px 0;
+      margin-top: 48px;
+      border-top: 1px solid #1e293b;
+    }
+    .banner-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .banner-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 1.3rem;
+      color: #94a3b8;
+    }
+    .banner-center {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .banner-center span { color: #f59e0b; }
+    .banner-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 1.3rem;
+      color: #94a3b8;
+    }
+
+    /* Interactive Simulation Controls */
+    .sim-bar {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 10px 16px;
+      margin: 16px 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+    .sim-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #334155;
+    }
+    .sim-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .steps-row { grid-template-columns: repeat(3, 1fr); }
+      .admin-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .steps-row { grid-template-columns: 1fr; }
+      .admin-grid { grid-template-columns: 1fr; }
+      .header-tagline { display: none; }
+      .banner-inner { flex-direction: column; gap: 12px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+    <div class="container header-inner">
+      <div class="brand-wrap">
+        <div class="brand-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Smart <span>Wait</span></h1>
+          <p>Intelligent Queue Management System</p>
+        </div>
+      </div>
+
+      <div class="header-tagline">
+        <span>Book • Track • Skip the Queue!</span>
+      </div>
+
+      <div class="header-right">
+        <a href="/dashboard" class="btn-xs" style="text-decoration:none; padding:8px 14px; font-size:0.82rem; font-weight:700; background:#0f172a; color:#fff; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
+          <span>📊</span> Dashboard
+        </a>
+        <a href="/login" class="btn-xs" style="text-decoration:none; padding:8px 14px; font-size:0.82rem; font-weight:700; background:#10b981; color:#fff; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
+          <span>👤</span> Sign In / Up
+        </a>
+        <button class="sound-btn" onclick="toggleAudio()" id="sound-toggle-btn" title="Toggle audio chime">
+          🔊 Sound ON
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Quick Simulation & Interactive Control Bar -->
+    <div class="sim-bar">
+      <div class="sim-left">
+        <span style="font-size:1.2rem">🚀</span>
+        <span><strong>Live Interactive Demo:</strong> Step through the customer queue flow and control it in real-time from the staff console below.</span>
+      </div>
+      <div class="sim-actions">
+        <button class="btn-xs" onclick="resetDemoFlow()">Reset Customer Step</button>
+        <button class="btn-xs" style="background:#0284c7; color:#fff; border-color:#0284c7;" onclick="triggerCallNext()">Staff: Call Next Token</button>
+      </div>
+    </div>
+
+    <!-- Section 1: How It Works? (Customer Process Flow) -->
+    <div class="section-title">How It Works?</div>
+
+    <div class="steps-row">
+      <!-- Step 1: Visit the Website -->
+      <div class="step-card" id="step-card-1">
+        <div class="step-header">
+          <div class="step-num-title">
+            <div class="step-badge">1</div>
+            <span>Visit the Website</span>
+          </div>
+          <div class="step-desc">Open Smart Wait and login or register.</div>
+        </div>
+        <div class="step-body">
+          <div class="hero-card-inner">
+            <div class="hero-mini-title">Skip the Queue, <span>Save Your Time!</span></div>
+            <div class="hero-mini-p">Book a digital queue token, track your position and get real-time updates.</div>
+            
+            <div class="avatar-queue-cluster">
+              <div class="avatar-icon avatar-1">👨‍🎓</div>
+              <div class="avatar-icon avatar-2">👩‍🎓</div>
+              <div class="avatar-icon avatar-3">👨‍💼</div>
+              <div class="avatar-icon avatar-4">👩‍⚕️</div>
+            </div>
+
+            <div style="margin-bottom:10px">
+              <input id="cust-name-input" type="text" placeholder="Your name (e.g. Arjun)" value="Arjun" style="width:100%; padding:6px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.8rem; margin-bottom:6px;" />
+            </div>
+
+            <button class="btn-action" onclick="goToStep(2)">
+              Get Started →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Join a Queue -->
+      <div class="step-card" id="step-card-2">
+        <div class="step-header">
+          <div class="step-num-title">
+            <div class="step-badge">2</div>
+            <span>Join a Queue</span>
+          </div>
+          <div class="step-desc">Select a service counter and book your token.</div>
+        </div>
+        <div class="step-body">
+          <div style="font-size:0.8rem; font-weight:700; color:#475569; margin-bottom:8px;">Available Services</div>
+          
+          <div id="services-container">
+            <!-- Dynamic Services -->
+            <div class="service-item-box">
+              <div class="service-left">
+                <div class="service-icon-wrap">🏛️</div>
+                <div class="service-meta">
+                  <h4>Banking Services</h4>
+                  <span>⏱️ Avg. 5 min</span>
+                </div>
+              </div>
+              <button class="btn-join" onclick="joinQueue(1, 'Banking Services', 'A')">Join Queue</button>
+            </div>
+
+            <div class="service-item-box">
+              <div class="service-left">
+                <div class="service-icon-wrap">🏥</div>
+                <div class="service-meta">
+                  <h4>Healthcare Services</h4>
+                  <span>⏱️ Avg. 7 min</span>
+                </div>
+              </div>
+              <button class="btn-join" onclick="joinQueue(2, 'Healthcare Services', 'B')">Join Queue</button>
+            </div>
+
+            <div class="service-item-box">
+              <div class="service-left">
+                <div class="service-icon-wrap">🎧</div>
+                <div class="service-meta">
+                  <h4>Customer Support</h4>
+                  <span>⏱️ Avg. 6 min</span>
+                </div>
+              </div>
+              <button class="btn-join" onclick="joinQueue(3, 'Customer Support', 'C')">Join Queue</button>
+            </div>
+          </div>
+
+          <div style="font-size:0.72rem; color:#64748b; text-align:center; margin-top:8px;">Click any service to book your digital token.</div>
+        </div>
+      </div>
+
+      <!-- Step 3: Get Your Token -->
+      <div class="step-card" id="step-card-3">
+        <div class="step-header">
+          <div class="step-num-title">
+            <div class="step-badge">3</div>
+            <span>Get Your Token</span>
+          </div>
+          <div class="step-desc">Receive a unique token with live queue status.</div>
+        </div>
+        <div class="step-body">
+          <div style="text-align:center">
+            <div class="token-success-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Token Generated!
+            </div>
+
+            <div class="token-ticket-display">
+              <div class="ticket-code" id="step3-token-code">A-014</div>
+              <div style="font-size:0.75rem; color:#64748b; margin-top:4px;" id="step3-service-name">Banking Services</div>
+            </div>
+
+            <div class="ticket-meta-row">
+              <div class="meta-line">
+                <span>👥</span>
+                <span>People Ahead: <strong id="step3-ahead">3</strong></span>
+              </div>
+              <div class="meta-line">
+                <span>⏱️</span>
+                <span>Estimated Time: ~ <strong id="step3-eta">8 min</strong></span>
+              </div>
+            </div>
+
+            <button class="btn-action" onclick="goToStep(4)">
+              Track Live Status
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Track in Real-Time -->
+      <div class="step-card" id="step-card-4">
+        <div class="step-header">
+          <div class="step-num-title">
+            <div class="step-badge">4</div>
+            <span>Track in Real-Time</span>
+          </div>
+          <div class="step-desc">Know your position and waiting time live.</div>
+        </div>
+        <div class="step-body">
+          <div class="status-card-inner">
+            <div style="font-size:0.8rem; font-weight:700; color:#475569;">Your Queue Status</div>
+
+            <div class="gauge-wrapper">
+              <svg class="gauge-svg" viewBox="0 0 140 140">
+                <circle class="gauge-bg" cx="70" cy="70" r="60"></circle>
+                <circle class="gauge-progress" id="gauge-circle" cx="70" cy="70" r="60"></circle>
+              </svg>
+              <div class="gauge-center-content">
+                <div class="gauge-num" id="gauge-count">3</div>
+                <div class="gauge-label">People Ahead</div>
+              </div>
+            </div>
+
+            <div class="eta-pill">
+              <span>⏱️</span>
+              <span>~ <strong id="tracker-eta">8 min</strong> Estimated Wait</span>
+            </div>
+
+            <div class="notify-banner">
+              <span>🔔</span>
+              <span>We will notify you when it's your turn!</span>
+            </div>
+
+            <div style="display:flex; gap:6px; width:100%; margin-top:8px;">
+              <button class="btn-xs" style="flex:1" onclick="simulateQueueStep()">Step -1 Ahead</button>
+              <button class="btn-xs" style="flex:1" onclick="triggerCallMyTurn()">Trigger Turn Now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5: Get Notified & Enter -->
+      <div class="step-card" id="step-card-5">
+        <div class="step-header">
+          <div class="step-num-title">
+            <div class="step-badge" style="background:#10b981;">5</div>
+            <span>Get Notified & Enter</span>
+          </div>
+          <div class="step-desc">Receive notification when it's your turn.</div>
+        </div>
+        <div class="step-body">
+          <div class="turn-card-inner">
+            <div class="bell-ring-icon">
+              🔔
+            </div>
+            <div class="turn-title">It's Your Turn!</div>
+            <div class="turn-sub" id="turn-assigned-counter">Please proceed to Counter 1</div>
+
+            <div style="background:rgba(16, 185, 129, 0.1); border-radius:8px; padding:6px 12px; font-size:0.8rem; color:#065f46; font-weight:700; margin-bottom:12px;">
+              Token: <span id="turn-token-code">A-014</span>
+            </div>
+
+            <button class="btn-counter-proceed" onclick="completeCustomerTurn()">
+              Go to Counter
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Admin Features -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:16px;">
+      <div class="section-title" style="margin-bottom:16px;">Admin Features</div>
+      <div style="margin-bottom:16px;">
+        <span class="badge-pill" style="background:#f1f5f9; border-color:#cbd5e1; color:#475569;">
+          🟢 Real-Time Staff Sync Active
+        </span>
+      </div>
+    </div>
+
+    <div class="admin-grid">
+      <!-- 1. Manage Counters -->
+      <div class="admin-card">
+        <div class="admin-card-head">
+          <div class="admin-card-title">
+            <div class="admin-card-num">✓</div>
+            <div>
+              <div>Manage Counters</div>
+              <div style="font-size:0.72rem; color:#64748b; font-weight:500;">Add or manage service counters.</div>
+            </div>
+          </div>
+          <button class="btn-join" style="padding:4px 8px; font-size:0.74rem;" onclick="addQuickCounter()">+ Add Counter</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="styled-table" id="counters-table">
+            <thead>
+              <tr>
+                <th>Counter Name</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Counter 1</strong></td>
+                <td><span class="status-badge active" id="c1-status">● Active</span></td>
+                <td><button class="btn-xs" onclick="toggleCounter(1)">Toggle</button></td>
+              </tr>
+              <tr>
+                <td><strong>Counter 2</strong></td>
+                <td><span class="status-badge active" id="c2-status">● Active</span></td>
+                <td><button class="btn-xs" onclick="toggleCounter(2)">Toggle</button></td>
+              </tr>
+              <tr>
+                <td><strong>Counter 3</strong></td>
+                <td><span class="status-badge active" id="c3-status">● Active</span></td>
+                <td><button class="btn-xs" onclick="toggleCounter(3)">Toggle</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 2. View Live Queue -->
+      <div class="admin-card">
+        <div class="admin-card-head">
+          <div class="admin-card-title">
+            <div class="admin-card-num">2</div>
+            <div>
+              <div>View Live Queue</div>
+              <div style="font-size:0.72rem; color:#64748b; font-weight:500;">Monitor all tokens in real-time.</div>
+            </div>
+          </div>
+          <button class="btn-xs" onclick="fetchActiveQueue()">🔄 Refresh</button>
+        </div>
+
+        <div class="table-responsive" style="max-height:180px; overflow-y:auto;">
+          <table class="styled-table" id="active-queue-table">
+            <thead>
+              <tr>
+                <th>Token No.</th>
+                <th>Service</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="queue-tbody">
+              <tr>
+                <td><strong>A-014</strong></td>
+                <td>Banking</td>
+                <td><span class="status-badge waiting">Waiting</span></td>
+              </tr>
+              <tr>
+                <td><strong>A-013</strong></td>
+                <td>Banking</td>
+                <td><span class="status-badge served">Served</span></td>
+              </tr>
+              <tr>
+                <td><strong>A-012</strong></td>
+                <td>Banking</td>
+                <td><span class="status-badge served">Served</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 3. Call Next Customer -->
+      <div class="admin-card" style="padding:12px;">
+        <div class="calling-console">
+          <div>
+            <div class="admin-card-head" style="border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:8px; padding-bottom:8px;">
+              <div class="admin-card-title" style="color:#fff;">
+                <div class="admin-card-num" style="background:#38bdf8; color:#0f172a;">3</div>
+                <div style="text-align:left">
+                  <div>Call Next Customer</div>
+                  <div style="font-size:0.7rem; color:#94a3b8; font-weight:500;">Easily call the next customer.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="calling-sub">Next Customer</div>
+            <div class="calling-token" id="calling-token-display">A-014</div>
+
+            <button class="speaker-wave-btn" onclick="playTurnAnnouncement(currentCalledToken, currentCounter)" title="Replay chime sound">
+              🔊
+            </button>
+          </div>
+
+          <div>
+            <button class="btn-call-next" onclick="triggerCallNext()">
+              Call Next
+            </button>
+            <div class="call-controls-row">
+              <button class="btn-secondary-action" onclick="markTokenServed()">Serve / Complete</button>
+              <button class="btn-secondary-action" onclick="skipCurrentToken()">Skip</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. View Analytics & Key Features -->
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div class="admin-card" style="flex:1;">
+          <div class="admin-card-head">
+            <div class="admin-card-title">
+              <div class="admin-card-num">4</div>
+              <div>
+                <div>View Analytics</div>
+                <div style="font-size:0.72rem; color:#64748b; font-weight:500;">Track queue performance with charts.</div>
+              </div>
+            </div>
+            <select style="font-size:0.75rem; border:1px solid #cbd5e1; border-radius:6px; padding:2px 6px;">
+              <option>Today</option>
+              <option>This Week</option>
+            </select>
+          </div>
+
+          <div style="font-size:0.76rem; font-weight:700; color:#475569;">Queue Statistics</div>
+
+          <!-- Interactive SVG Curve Chart -->
+          <div class="analytics-chart-wrap">
+            <svg viewBox="0 0 320 110" width="100%" height="100%">
+              <defs>
+                <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#0284c7" stop-opacity="0.3"></stop>
+                  <stop offset="100%" stop-color="#0284c7" stop-opacity="0.0"></stop>
+                </linearGradient>
+              </defs>
+              <line x1="20" y1="90" x2="310" y2="90" stroke="#e2e8f0" stroke-width="1"></line>
+              <line x1="20" y1="50" x2="310" y2="50" stroke="#f1f5f9" stroke-width="1"></line>
+              
+              <!-- Curve matching the diagram (9AM, 12PM, 3PM, 6PM) -->
+              <path d="M 30,75 C 70,60 100,25 120,25 C 150,25 180,60 210,48 C 240,36 270,18 300,18 L 300,90 L 30,90 Z" fill="url(#chartGrad)"></path>
+              <path d="M 30,75 C 70,60 100,25 120,25 C 150,25 180,60 210,48 C 240,36 270,18 300,18" fill="none" stroke="#0284c7" stroke-width="3"></path>
+              
+              <!-- Data Points -->
+              <circle cx="30" cy="75" r="4" fill="#0284c7" stroke="#fff" stroke-width="2"></circle>
+              <circle cx="120" cy="25" r="4" fill="#0284c7" stroke="#fff" stroke-width="2"></circle>
+              <circle cx="210" cy="48" r="4" fill="#0284c7" stroke="#fff" stroke-width="2"></circle>
+              <circle cx="300" cy="18" r="4" fill="#0284c7" stroke="#fff" stroke-width="2"></circle>
+
+              <!-- Labels -->
+              <text x="25" y="104" font-size="9" fill="#94a3b8" font-weight="600">9AM</text>
+              <text x="110" y="104" font-size="9" fill="#94a3b8" font-weight="600">12PM</text>
+              <text x="200" y="104" font-size="9" fill="#94a3b8" font-weight="600">3PM</text>
+              <text x="290" y="104" font-size="9" fill="#94a3b8" font-weight="600">6PM</text>
+            </svg>
+          </div>
+
+          <div class="metrics-summary-bar">
+            <div class="metric-pill">
+              <small>Total Served</small>
+              <strong id="metric-served">104</strong>
+            </div>
+            <div class="metric-pill">
+              <small>Avg Wait</small>
+              <strong id="metric-avg">~7 min</strong>
+            </div>
+            <div class="metric-pill">
+              <small>Active Counters</small>
+              <strong id="metric-counters">3</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Key Features Checklist Card -->
+        <div class="features-card">
+          <div style="font-size:0.95rem; font-weight:800; color:#0f172a; margin-bottom:12px;">Key Features</div>
+          <ul class="features-list">
+            <li><span class="check-icon">✓</span> Digital Queue Tokens</li>
+            <li><span class="check-icon">✓</span> Real-Time Tracking</li>
+            <li><span class="check-icon">✓</span> Estimated Wait Time</li>
+            <li><span class="check-icon">✓</span> Multi-Service Support</li>
+            <li><span class="check-icon">✓</span> Admin Control Panel</li>
+            <li><span class="check-icon">✓</span> Queue Analytics</li>
+            <li><span class="check-icon">✓</span> Responsive Design</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Dark Banner -->
+  <footer class="bottom-banner">
+    <div class="container banner-inner">
+      <div class="banner-left">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+      </div>
+
+      <div class="banner-center">
+        <span>⚡</span> Smart Wait – Because Your Time Matters!
+      </div>
+
+      <div class="banner-right">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 22h14"></path>
+          <path d="M5 2h14"></path>
+          <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path>
+          <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path>
+        </svg>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Web Audio Sound Engine -->
+  <script>
+    let audioEnabled = true;
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      return audioCtx;
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      const btn = document.getElementById('sound-toggle-btn');
+      btn.textContent = audioEnabled ? '🔊 Sound ON' : '🔇 Sound OFF';
+    }
+
+    // High quality dual-tone airport / counter chime
+    function playChime() {
+      if (!audioEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        if (ctx.state === 'suspended') ctx.resume();
+
+        const playTone = (freq, start, duration) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+          gain.gain.setValueAtTime(0.3, ctx.currentTime + start);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + duration);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + start);
+          osc.stop(ctx.currentTime + start + duration);
+        };
+
+        playTone(587.33, 0.0, 0.5); // D5
+        playTone(880.00, 0.35, 0.8); // A5
+      } catch (e) {
+        console.warn('Audio chime warning:', e);
+      }
+    }
+
+    // Voice announcement using Web SpeechSynthesis API
+    function playTurnAnnouncement(tokenCode, counterName) {
+      playChime();
+      if (!audioEnabled || !('speechSynthesis' in window)) return;
+      try {
+        window.speechSynthesis.cancel();
+        setTimeout(() => {
+          const text = `Attention please: Token ${tokenCode}, please proceed to ${counterName || 'Counter 1'}.`;
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.rate = 1.0;
+          utterance.pitch = 1.1;
+          window.speechSynthesis.speak(utterance);
+        }, 500);
+      } catch (e) {
+        console.warn('Speech synthesis warning:', e);
+      }
+    }
+  </script>
+
+  <!-- Application Logic & Real-time Integration -->
+  <script>
+    let currentStep = 1;
+    let myToken = {
+      code: 'A-014',
+      service: 'Banking Services',
+      peopleAhead: 3,
+      eta: 8,
+      counter: 'Counter 1',
+      status: 'waiting'
+    };
+    let currentCalledToken = 'A-014';
+    let currentCounter = 'Counter 1';
+    let counterStates = { 1: 'Active', 2: 'Active', 3: 'Active' };
+
+    // Set initial active card visual state
+    function updateStepHighlights(step) {
+      for (let i = 1; i <= 5; i++) {
+        const card = document.getElementById(`step-card-${i}`);
+        if (!card) continue;
+        if (i === step) {
+          card.classList.add('active-step');
+        } else {
+          card.classList.remove('active-step');
+        }
+      }
+    }
+
+    function goToStep(step) {
+      currentStep = step;
+      updateStepHighlights(step);
+      if (step === 3) {
+        playChime();
+      } else if (step === 5) {
+        playTurnAnnouncement(myToken.code, myToken.counter);
+      }
+    }
+
+    function resetDemoFlow() {
+      myToken.peopleAhead = 3;
+      myToken.eta = 8;
+      myToken.status = 'waiting';
+      updateTrackerDisplay();
+      goToStep(1);
+    }
+
+    // Join queue handler
+    async function joinQueue(serviceId, serviceName, prefix) {
+      const nameInput = document.getElementById('cust-name-input');
+      const custName = (nameInput && nameInput.value.trim()) || 'Arjun';
+
+      try {
+        // Try calling the backend API
+        const res = await fetch('/api/queue/join', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            service_id: serviceId,
+            customer_name: custName,
+            priority_category: 'general'
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          myToken.code = data.token_code;
+          myToken.service = data.service_name;
+          myToken.peopleAhead = data.people_ahead;
+          myToken.eta = data.estimated_wait_min;
+          myToken.counter = data.counter_code || 'Counter 1';
+        } else {
+          // Fallback simulation
+          myToken.code = `${prefix}-014`;
+          myToken.service = serviceName;
+          myToken.peopleAhead = 3;
+          myToken.eta = 8;
+        }
+      } catch (e) {
+        myToken.code = `${prefix}-014`;
+        myToken.service = serviceName;
+        myToken.peopleAhead = 3;
+        myToken.eta = 8;
+      }
+
+      // Update Card 3 & 4
+      document.getElementById('step3-token-code').textContent = myToken.code;
+      document.getElementById('step3-service-name').textContent = myToken.service;
+      document.getElementById('step3-ahead').textContent = myToken.peopleAhead;
+      document.getElementById('step3-eta').textContent = `${myToken.eta} min`;
+
+      document.getElementById('calling-token-display').textContent = myToken.code;
+      currentCalledToken = myToken.code;
+
+      updateTrackerDisplay();
+      goToStep(3);
+      fetchActiveQueue();
+    }
+
+    // Update Circular Gauge and ETA
+    function updateTrackerDisplay() {
+      const countEl = document.getElementById('gauge-count');
+      const etaEl = document.getElementById('tracker-eta');
+      const circle = document.getElementById('gauge-circle');
+
+      if (countEl) countEl.textContent = myToken.peopleAhead;
+      if (etaEl) etaEl.textContent = `${myToken.eta} min`;
+
+      // 377 is the perimeter of r=60
+      // 0 people ahead = full circle offset (377), 5 people = small offset
+      const maxRange = 5;
+      const progressRatio = Math.max(0, Math.min(1, 1 - (myToken.peopleAhead / maxRange)));
+      const offset = 377 - (377 * progressRatio);
+      if (circle) circle.style.strokeDashoffset = offset;
+
+      if (myToken.peopleAhead <= 0) {
+        goToStep(5);
+      }
+    }
+
+    // Step -1 Simulation button
+    function simulateQueueStep() {
+      if (myToken.peopleAhead > 0) {
+        myToken.peopleAhead--;
+        myToken.eta = Math.max(1, myToken.peopleAhead * 3);
+        updateTrackerDisplay();
+      }
+    }
+
+    function triggerCallMyTurn() {
+      myToken.peopleAhead = 0;
+      myToken.eta = 0;
+      updateTrackerDisplay();
+      document.getElementById('turn-token-code').textContent = myToken.code;
+      document.getElementById('turn-assigned-counter').textContent = `Please proceed to ${myToken.counter}`;
+      goToStep(5);
+    }
+
+    function completeCustomerTurn() {
+      alert(`🎉 Thank you, ${document.getElementById('cust-name-input').value || 'Customer'}! Your visit at ${myToken.counter} is complete.`);
+      resetDemoFlow();
+    }
+
+    // Admin: Toggle Counter status
+    async function toggleCounter(counterId) {
+      counterStates[counterId] = (counterStates[counterId] === 'Active') ? 'Paused' : 'Active';
+      const badge = document.getElementById(`c${counterId}-status`);
+      if (badge) {
+        if (counterStates[counterId] === 'Active') {
+          badge.className = 'status-badge active';
+          badge.textContent = '● Active';
+        } else {
+          badge.className = 'status-badge paused';
+          badge.textContent = '⏸ Paused';
+        }
+      }
+
+      try {
+        await fetch(`/api/queue/counters/${counterId}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: counterStates[counterId].toLowerCase() })
+        });
+      } catch (e) {}
+    }
+
+    function addQuickCounter() {
+      const name = prompt('Enter counter name:', `Counter ${Object.keys(counterStates).length + 1}`);
+      if (!name) return;
+      const newId = Object.keys(counterStates).length + 1;
+      counterStates[newId] = 'Active';
+
+      const tbody = document.querySelector('#counters-table tbody');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${name}</strong></td>
+        <td><span class="status-badge active" id="c${newId}-status">● Active</span></td>
+        <td><button class="btn-xs" onclick="toggleCounter(${newId})">Toggle</button></td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    // Admin: Call Next Token
+    async function triggerCallNext() {
+      try {
+        const res = await fetch('/api/queue/call-next', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          currentCalledToken = data.token_code;
+          currentCounter = data.counter_code || 'Counter 1';
+        } else {
+          // Advance sequential demo token
+          currentCalledToken = 'A-014';
+        }
+      } catch (e) {
+        currentCalledToken = 'A-014';
+      }
+
+      document.getElementById('calling-token-display').textContent = currentCalledToken;
+
+      // Sync customer tracker if their token is called
+      if (myToken.code === currentCalledToken) {
+        triggerCallMyTurn();
+      } else {
+        simulateQueueStep();
+        playTurnAnnouncement(currentCalledToken, currentCounter);
+      }
+      fetchActiveQueue();
+    }
+
+    function markTokenServed() {
+      alert(`Token ${currentCalledToken} marked as served!`);
+      fetchActiveQueue();
+    }
+
+    function skipCurrentToken() {
+      alert(`Token ${currentCalledToken} skipped.`);
+      triggerCallNext();
+    }
+
+    // Fetch active queue table from backend
+    async function fetchActiveQueue() {
+      try {
+        const res = await fetch('/api/queue/active?limit=5');
+        if (res.ok) {
+          const tokens = await res.json();
+          const tbody = document.getElementById('queue-tbody');
+          if (tokens.length > 0) {
+            tbody.innerHTML = '';
+            tokens.forEach(t => {
+              const tr = document.createElement('tr');
+              let statusClass = 'waiting';
+              if (t.status === 'completed' || t.status === 'served') statusClass = 'served';
+              else if (t.status === 'called' || t.status === 'serving') statusClass = 'serving';
+              else if (t.status === 'skipped') statusClass = 'skipped';
+
+              tr.innerHTML = `
+                <td><strong>${t.token_code}</strong></td>
+                <td>${t.service_name}</td>
+                <td><span class="status-badge ${statusClass}">${t.status.toUpperCase()}</span></td>
+              `;
+              tbody.appendChild(tr);
+            });
+          }
+        }
+      } catch (e) {}
+    }
+
+    // Load initial analytics from API
+    async function fetchAnalytics() {
+      try {
+        const res = await fetch('/api/queue/analytics');
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('metric-served').textContent = data.served_today;
+          document.getElementById('metric-avg').textContent = `~${Math.round(data.avg_wait_min)} min`;
+          document.getElementById('metric-counters').textContent = data.active_counters;
+        }
+      } catch (e) {}
+    }
+
+    // Auto-poll active queue every 4 seconds
+    setInterval(fetchActiveQueue, 4000);
+
+    // Initial setup on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      updateStepHighlights(1);
+      fetchActiveQueue();
+      fetchAnalytics();
+    });
+  </script>
+</body>
+</html>
+

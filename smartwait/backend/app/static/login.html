@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Wait - Sign In & Create Account</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --primary-light: #ecfdf5;
+      --accent: #0284c7;
+      --slate-50: #f8fafc;
+      --slate-100: #f1f5f9;
+      --slate-200: #e2e8f0;
+      --slate-400: #94a3b8;
+      --slate-600: #475569;
+      --slate-700: #334155;
+      --slate-800: #1e293b;
+      --slate-900: #0f172a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background: #ffffff;
+      color: var(--slate-800);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .auth-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      width: 100vw;
+      min-height: 100vh;
+    }
+
+    /* Left Promo Column */
+    .promo-side {
+      background: #f8fafc;
+      border-right: 1px solid var(--slate-200);
+      padding: 60px 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+    .promo-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--slate-900);
+    }
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #10b981, #0284c7);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+    .promo-quote {
+      margin: 40px 0 20px;
+      font-size: 2.1rem;
+      font-weight: 800;
+      line-height: 1.25;
+      color: var(--slate-900);
+      letter-spacing: -0.02em;
+    }
+    .promo-quote span {
+      color: #10b981;
+    }
+
+    /* Queue Vector Illustration matching image */
+    .illustration-wrap {
+      margin: 20px 0;
+      background: #fff;
+      border: 1px solid var(--slate-200);
+      border-radius: 20px;
+      padding: 30px 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      height: 240px;
+      position: relative;
+    }
+    .counter-booth {
+      width: 80px;
+      height: 130px;
+      background: #10b981;
+      border-radius: 10px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding-bottom: 10px;
+      box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+      margin-right: 30px;
+    }
+    .booth-window {
+      width: 55px;
+      height: 50px;
+      background: #ecfdf5;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+    .booth-num {
+      position: absolute;
+      top: 6px;
+      left: 8px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: #fff;
+      background: rgba(0,0,0,0.2);
+      padding: 1px 4px;
+      border-radius: 4px;
+    }
+    .clock-wall {
+      position: absolute;
+      top: 25px;
+      left: 140px;
+      width: 32px;
+      height: 32px;
+      border: 2px solid #cbd5e1;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      font-size: 0.8rem;
+    }
+    .people-queue-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 14px;
+      position: relative;
+      padding-bottom: 10px;
+    }
+    .queue-stanchion {
+      position: absolute;
+      bottom: 6px;
+      left: -10px;
+      width: 190px;
+      height: 30px;
+      border-top: 3px solid #10b981;
+      border-radius: 4px;
+      pointer-events: none;
+    }
+    .person-stick {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .person-head {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #fed7aa;
+      border: 2px solid #334155;
+    }
+    .person-body {
+      width: 28px;
+      height: 48px;
+      border-radius: 8px 8px 0 0;
+      background: #10b981;
+      border: 2px solid #334155;
+    }
+    .person-body.c2 { background: #334155; }
+    .person-body.c3 { background: #0284c7; }
+    .person-body.c4 { background: #10b981; }
+
+    .promo-foot {
+      font-size: 0.85rem;
+      color: var(--slate-600);
+      line-height: 1.5;
+    }
+
+    /* Right Form Column */
+    .form-side {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 80px;
+      max-width: 580px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .tab-switch {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--slate-200);
+      padding-bottom: 8px;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--slate-400);
+      cursor: pointer;
+      padding: 6px 12px;
+      position: relative;
+    }
+    .tab-btn.active {
+      color: var(--slate-900);
+    }
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -9px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: #10b981;
+      border-radius: 2px;
+    }
+
+    .form-heading h2 {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: var(--slate-900);
+      margin-bottom: 6px;
+    }
+    .form-heading p {
+      font-size: 0.88rem;
+      color: var(--slate-600);
+      margin-bottom: 24px;
+    }
+
+    .field-group {
+      margin-bottom: 16px;
+    }
+    .field-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--slate-700);
+      margin-bottom: 6px;
+    }
+    .field-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--slate-300);
+      border-radius: 10px;
+      font-size: 0.92rem;
+      font-family: inherit;
+      color: var(--slate-900);
+      outline: none;
+      transition: all 0.2s;
+    }
+    .field-input:focus {
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: #10b981;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+    .btn-submit:hover {
+      background: #059669;
+      transform: translateY(-1px);
+    }
+
+    .divider-row {
+      display: flex;
+      align-items: center;
+      margin: 22px 0;
+      color: var(--slate-400);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .divider-row::before, .divider-row::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--slate-200);
+    }
+    .divider-row span {
+      padding: 0 12px;
+    }
+
+    .btn-oauth {
+      width: 100%;
+      background: #fff;
+      border: 1px solid var(--slate-300);
+      border-radius: 10px;
+      padding: 11px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--slate-700);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-oauth:hover {
+      background: var(--slate-50);
+      border-color: var(--slate-400);
+    }
+
+    .quick-roles {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 16px 0;
+    }
+    .btn-role-demo {
+      background: #f8fafc;
+      border: 1px solid var(--slate-200);
+      border-radius: 8px;
+      padding: 8px 6px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--slate-700);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .btn-role-demo:hover {
+      background: #ecfdf5;
+      border-color: #10b981;
+      color: #059669;
+    }
+
+    .disclaimer-text {
+      font-size: 0.76rem;
+      color: var(--slate-400);
+      text-align: center;
+      line-height: 1.45;
+      margin-top: 20px;
+    }
+    .disclaimer-text a {
+      color: var(--slate-600);
+      text-decoration: underline;
+    }
+
+    .alert-banner {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .alert-banner.error {
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+    .alert-banner.success {
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+    }
+
+    @media (max-width: 900px) {
+      .auth-container { grid-template-columns: 1fr; }
+      .promo-side { display: none; }
+      .form-side { padding: 40px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-container">
+    <!-- Left Column: Quote & Vector Queue Booth Illustration -->
+    <div class="promo-side">
+      <div class="promo-brand">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <span>SmartWait</span>
+      </div>
+
+      <div>
+        <h1 class="promo-quote">
+          "Start Managing Your Queues Effortlessly: <span>Sign Up Now!</span>"
+        </h1>
+
+        <!-- Vector Illustration Matching Screen 1 -->
+        <div class="illustration-wrap">
+          <div class="clock-wall">⏱️</div>
+          <div class="counter-booth">
+            <span class="booth-num">01</span>
+            <div class="booth-window">👩‍💼</div>
+          </div>
+          <div class="people-queue-row">
+            <div class="queue-stanchion"></div>
+            <div class="person-stick">
+              <div class="person-head"></div>
+              <div class="person-body c4"></div>
+            </div>
+            <div class="person-stick">
+              <div class="person-head"></div>
+              <div class="person-body c2"></div>
+            </div>
+            <div class="person-stick">
+              <div class="person-head"></div>
+              <div class="person-body c3"></div>
+            </div>
+            <div class="person-stick">
+              <div class="person-head"></div>
+              <div class="person-body c4"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="promo-foot">
+        Designed for simplicity and ease of use. The Sign-In screen offers quick access with an intuitive layout, while the Sign-Up screen features a clear, welcoming interface.
+      </div>
+    </div>
+
+    <!-- Right Column: Form Side -->
+    <div class="form-side">
+      <div class="tab-switch">
+        <button class="tab-btn active" id="tab-signup" onclick="switchTab('signup')">Create an account</button>
+        <button class="tab-btn" id="tab-signin" onclick="switchTab('signin')">Sign In</button>
+      </div>
+
+      <div class="form-heading">
+        <h2 id="form-title">Create an account</h2>
+        <p id="form-sub">Enter your email below to create your account</p>
+      </div>
+
+      <div id="alert-box" class="alert-banner"></div>
+
+      <!-- Quick 1-Click Role Login Demo -->
+      <div style="margin-bottom:12px;">
+        <span style="font-size:0.75rem; font-weight:700; color:var(--slate-400); text-transform:uppercase;">Quick Demo Login:</span>
+        <div class="quick-roles">
+          <button class="btn-role-demo" onclick="quickFill('student')">🎓 Student</button>
+          <button class="btn-role-demo" onclick="quickFill('staff')">👨‍💼 Staff</button>
+          <button class="btn-role-demo" onclick="quickFill('admin')">🛡️ Admin</button>
+        </div>
+      </div>
+
+      <form id="auth-form" onsubmit="handleAuthSubmit(event)">
+        <div class="field-group" id="group-name">
+          <label for="input-name">Full Name</label>
+          <input class="field-input" id="input-name" placeholder="Arjun Kumar" value="Arjun Kumar" />
+        </div>
+
+        <div class="field-group">
+          <label for="input-email">Email Address</label>
+          <input class="field-input" id="input-email" type="email" placeholder="name@example.com" value="arjun@smartwait.dev" required />
+        </div>
+
+        <div class="field-group">
+          <label for="input-password">Password</label>
+          <input class="field-input" id="input-password" type="password" placeholder="••••••••" value="Passw0rd1" required />
+        </div>
+
+        <div class="field-group" id="group-roll">
+          <label for="input-roll">Roll Number / Student ID</label>
+          <input class="field-input" id="input-roll" placeholder="21CS001" value="21CS001" />
+        </div>
+
+        <button type="submit" class="btn-submit" id="btn-submit-text">Create an account</button>
+      </form>
+
+      <div class="divider-row">
+        <span>OR CONTINUE WITH</span>
+      </div>
+
+      <button class="btn-oauth" onclick="demoOAuthLogin()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+        </svg>
+        GitHub
+      </button>
+
+      <div style="margin-top:16px; text-align:center;">
+        <a href="/" style="font-size:0.84rem; color:#0284c7; text-decoration:none; font-weight:700;">← Back to Customer Queue Experience</a>
+      </div>
+
+      <p class="disclaimer-text">
+        By clicking continue, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    let mode = 'signup';
+
+    function switchTab(newMode) {
+      mode = newMode;
+      const tabSignup = document.getElementById('tab-signup');
+      const tabSignin = document.getElementById('tab-signin');
+      const groupName = document.getElementById('group-name');
+      const groupRoll = document.getElementById('group-roll');
+      const formTitle = document.getElementById('form-title');
+      const formSub = document.getElementById('form-sub');
+      const btnSubmit = document.getElementById('btn-submit-text');
+      const alertBox = document.getElementById('alert-box');
+      alertBox.style.display = 'none';
+
+      if (mode === 'signup') {
+        tabSignup.classList.add('active');
+        tabSignin.classList.remove('active');
+        groupName.style.display = 'block';
+        groupRoll.style.display = 'block';
+        formTitle.textContent = 'Create an account';
+        formSub.textContent = 'Enter your email below to create your account';
+        btnSubmit.textContent = 'Create an account';
+      } else {
+        tabSignup.classList.remove('active');
+        tabSignin.classList.add('active');
+        groupName.style.display = 'none';
+        groupRoll.style.display = 'none';
+        formTitle.textContent = 'Sign In';
+        formSub.textContent = 'Enter your credentials to access your account';
+        btnSubmit.textContent = 'Sign In';
+      }
+    }
+
+    function showAlert(msg, isSuccess = false) {
+      const alertBox = document.getElementById('alert-box');
+      alertBox.className = `alert-banner ${isSuccess ? 'success' : 'error'}`;
+      alertBox.textContent = msg;
+      alertBox.style.display = 'block';
+    }
+
+    function quickFill(role) {
+      if (role === 'student') {
+        document.getElementById('input-name').value = 'Arjun Kumar';
+        document.getElementById('input-email').value = 'arjun@smartwait.dev';
+        document.getElementById('input-password').value = 'Passw0rd1';
+        document.getElementById('input-roll').value = '21CS001';
+      } else if (role === 'staff') {
+        document.getElementById('input-name').value = 'Priya Sharma';
+        document.getElementById('input-email').value = 'staff@smartwait.dev';
+        document.getElementById('input-password').value = 'Passw0rd1';
+      } else if (role === 'admin') {
+        document.getElementById('input-name').value = 'Admin Officer';
+        document.getElementById('input-email').value = 'admin@smartwait.dev';
+        document.getElementById('input-password').value = 'Passw0rd1';
+      }
+      switchTab('signin');
+    }
+
+    async function handleAuthSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('input-email').value.trim();
+      const password = document.getElementById('input-password').value;
+      const fullName = document.getElementById('input-name').value.trim();
+      const rollNumber = document.getElementById('input-roll').value.trim();
+
+      try {
+        if (mode === 'signup') {
+          const res = await fetch('/api/auth/register/student', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email,
+              password,
+              full_name: fullName,
+              roll_number: rollNumber || '21CS099',
+              department: 'General'
+            })
+          });
+
+          if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.detail || 'Registration failed');
+          }
+
+          showAlert('Account created successfully! Signing you in...', true);
+        }
+
+        // Login step
+        const loginRes = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        if (!loginRes.ok) {
+          const err = await loginRes.json();
+          throw new Error(err.detail || 'Invalid email or password');
+        }
+
+        const data = await loginRes.json();
+        localStorage.setItem('smartwait_token', data.access_token);
+        localStorage.setItem('smartwait_role', data.role);
+        localStorage.setItem('smartwait_user', email);
+
+        showAlert('Authenticated! Redirecting...', true);
+
+        setTimeout(() => {
+          if (data.role === 'admin' || data.role === 'staff') {
+            window.location.href = '/dashboard';
+          } else {
+            window.location.href = '/';
+          }
+        }, 800);
+
+      } catch (err) {
+        showAlert(err.message, false);
+      }
+    }
+
+    function demoOAuthLogin() {
+      showAlert('Signed in via GitHub Demo. Redirecting...', true);
+      localStorage.setItem('smartwait_role', 'admin');
+      setTimeout(() => { window.location.href = '/dashboard'; }, 800);
+    }
+  </script>
+</body>
+</html>
+

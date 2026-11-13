@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartWait - Services & Queue Operations Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --primary-soft: #ecfdf5;
+      --accent: #0284c7;
+      --accent-soft: #f0f9ff;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --slate-50: #f8fafc;
+      --slate-100: #f1f5f9;
+      --slate-200: #e2e8f0;
+      --slate-300: #cbd5e1;
+      --slate-400: #94a3b8;
+      --slate-500: #64748b;
+      --slate-600: #475569;
+      --slate-700: #334155;
+      --slate-800: #1e293b;
+      --slate-900: #0f172a;
+      --sidebar-width: 250px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background: #f8fafc;
+      color: var(--slate-800);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* Sidebar Layout Matching Screen 2 */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: #ffffff;
+      border-right: 1px solid var(--slate-200);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 50;
+    }
+
+    .sidebar-brand {
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--slate-100);
+    }
+    .sidebar-brand-icon {
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, #10b981, #0284c7);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+    .sidebar-brand-text h2 {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--slate-900);
+      line-height: 1.1;
+    }
+    .sidebar-brand-text p {
+      font-size: 0.72rem;
+      color: var(--slate-500);
+    }
+
+    .sidebar-menu {
+      padding: 16px 12px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .menu-group-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--slate-400);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 10px 12px 6px;
+    }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      color: var(--slate-600);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 2px;
+    }
+    .menu-item:hover {
+      background: var(--slate-100);
+      color: var(--slate-900);
+    }
+    .menu-item.active {
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+      font-weight: 700;
+    }
+    .menu-badge {
+      margin-left: auto;
+      background: #ef4444;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 999px;
+    }
+
+    .sidebar-user {
+      padding: 16px;
+      border-top: 1px solid var(--slate-100);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fafcff;
+    }
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #dbeafe;
+      color: #1e40af;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .user-details {
+      flex: 1;
+      overflow: hidden;
+    }
+    .user-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--slate-900);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+    .user-role {
+      font-size: 0.7rem;
+      color: var(--slate-500);
+    }
+    .btn-logout {
+      background: none;
+      border: none;
+      color: var(--slate-400);
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 4px;
+    }
+    .btn-logout:hover { color: #ef4444; }
+
+    /* Main Content Area */
+    .main-wrapper {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    /* Topbar */
+    .topbar {
+      height: 70px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--slate-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+    .topbar-title h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--slate-900);
+    }
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn-secondary {
+      background: #fff;
+      border: 1px solid var(--slate-300);
+      color: var(--slate-700);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-secondary:hover { background: var(--slate-50); }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-primary:hover { background: var(--primary-dark); }
+
+    /* Tabs Bar Matching Screen 2 */
+    .tabs-bar {
+      background: #ffffff;
+      border-bottom: 1px solid var(--slate-200);
+      padding: 0 32px;
+      display: flex;
+      gap: 20px;
+    }
+    .tab-item {
+      padding: 14px 4px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--slate-500);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab-item:hover { color: var(--slate-900); }
+    .tab-item.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    /* Content Body */
+    .content-body {
+      padding: 28px 32px 60px;
+      flex: 1;
+    }
+
+    /* Tab 1: Service Profile Cards Grid (Screen 2) */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .service-profile-card {
+      background: #ffffff;
+      border: 1px solid var(--slate-200);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.02);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s;
+    }
+    .service-profile-card:hover {
+      box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+      border-color: var(--slate-300);
+      transform: translateY(-2px);
+    }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .service-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--slate-900);
+    }
+    .service-badge {
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+    .service-desc {
+      font-size: 0.8rem;
+      color: var(--slate-500);
+      line-height: 1.45;
+      margin-bottom: 14px;
+    }
+    .service-location {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: var(--slate-600);
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .location-tag {
+      background: var(--slate-100);
+      color: var(--slate-600);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+    }
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      border-top: 1px solid var(--slate-100);
+      padding-top: 12px;
+    }
+    .btn-card-action {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      border: 1px solid var(--slate-200);
+      background: #fff;
+      color: var(--slate-700);
+    }
+    .btn-card-action.primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .btn-card-action:hover { opacity: 0.9; }
+
+    /* Tab 2: Operations & Queue Call Console */
+    .ops-split {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 24px;
+    }
+    .panel-box {
+      background: #fff;
+      border: 1px solid var(--slate-200);
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.02);
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--slate-100);
+    }
+    .panel-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--slate-900);
+    }
+
+    /* Call Next Stage */
+    .call-stage {
+      background: #0f172a;
+      border-radius: 14px;
+      padding: 24px;
+      color: #fff;
+      text-align: center;
+    }
+    .stage-sub {
+      color: #94a3b8;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .stage-token {
+      font-size: 3.2rem;
+      font-weight: 800;
+      color: #38bdf8;
+      letter-spacing: 2px;
+      margin: 8px 0 14px;
+    }
+    .btn-stage-call {
+      width: 100%;
+      background: #0284c7;
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(2, 132, 199, 0.4);
+      margin-bottom: 10px;
+      transition: all 0.2s;
+    }
+    .btn-stage-call:hover { background: #0369a1; }
+    .stage-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .btn-stage-sub {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #fff;
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-stage-sub:hover { background: rgba(255,255,255,0.2); }
+
+    /* Live Queue & Counters Tables */
+    .styled-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    .styled-table th {
+      text-align: left;
+      padding: 10px 12px;
+      color: var(--slate-500);
+      font-weight: 700;
+      border-bottom: 1px solid var(--slate-200);
+      background: var(--slate-50);
+    }
+    .styled-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--slate-100);
+      color: var(--slate-800);
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .status-badge.active { background: #ecfdf5; color: #059669; }
+    .status-badge.paused { background: #fffbeb; color: #d97706; }
+    .status-badge.waiting { background: #fef3c7; color: #b45309; }
+    .status-badge.serving { background: #dbeafe; color: #1d4ed8; }
+    .status-badge.served { background: #ecfdf5; color: #059669; }
+    .status-badge.skipped { background: #f1f5f9; color: #64748b; }
+
+    /* Tab 3: Analytics View */
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .metric-card {
+      background: #fff;
+      border: 1px solid var(--slate-200);
+      border-radius: 14px;
+      padding: 18px;
+    }
+    .metric-card small {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--slate-500);
+      display: block;
+      margin-bottom: 4px;
+    }
+    .metric-card h3 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--slate-900);
+    }
+    .metric-card span {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    @media (max-width: 1024px) {
+      .ops-split { grid-template-columns: 1fr; }
+      .metrics-row { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* ---- Chat styles ---- */
+    .chat-conv-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; cursor: pointer; transition: background 0.15s;
+      border-bottom: 1px solid var(--slate-100);
+    }
+    .chat-conv-item:hover { background: var(--slate-50); }
+    .chat-conv-item.active { background: var(--primary-soft); }
+    .chat-conv-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: #dbeafe; color: #1e40af;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.85rem; flex-shrink: 0;
+    }
+    .chat-conv-name { font-weight: 700; font-size: 0.84rem; display: flex; align-items: center; gap: 6px; }
+    .chat-conv-last { font-size: 0.75rem; color: var(--slate-500); margin-top: 2px; }
+    .chat-msg { display: flex; flex-direction: column; }
+    .chat-msg.sent { align-items: flex-end; }
+    .chat-msg.received { align-items: flex-start; }
+    .chat-bubble {
+      max-width: 72%; padding: 10px 14px; border-radius: 14px;
+      font-size: 0.84rem; line-height: 1.5;
+    }
+    .chat-bubble.primary { background: var(--primary); color: #fff; border-bottom-right-radius: 4px; }
+    .chat-bubble.warn { background: #fef3c7; color: #92400e; border-bottom-left-radius: 4px; }
+    .chat-bubble.plain { background: var(--slate-100); color: var(--slate-800); border-bottom-left-radius: 4px; }
+    .chat-time { font-size: 0.7rem; color: var(--slate-400); margin-top: 4px; }
+
+    /* ---- Org styles ---- */
+    .org-field { display: flex; flex-direction: column; gap: 4px; }
+    .org-field label { font-size: 0.75rem; font-weight: 700; color: var(--slate-500); }
+    .org-input {
+      border: 1px solid var(--slate-200); border-radius: 8px;
+      padding: 8px 12px; font-size: 0.84rem; outline: none;
+      font-family: inherit; color: var(--slate-800);
+    }
+    .org-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(16,185,129,0.12); }
+    .toggle-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0; border-bottom: 1px solid var(--slate-100);
+      font-size: 0.84rem; font-weight: 600; color: var(--slate-700); cursor: pointer;
+    }
+    .toggle-chk { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Matching Screen 2 -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+      </div>
+      <div class="sidebar-brand-text">
+        <h2>SmartWait Clinic</h2>
+        <p>Operations & Queues</p>
+      </div>
+    </div>
+
+    <div class="sidebar-menu">
+      <div class="menu-group-label">Main</div>
+      <a class="menu-item active" onclick="switchTab('services')">
+        <span>🏢</span> Services & Profiles
+      </a>
+      <a class="menu-item" onclick="switchTab('queue')">
+        <span>🎫</span> Live Queue & Counters
+      </a>
+      <a class="menu-item" onclick="switchTab('analytics')">
+        <span>📈</span> Analytics Dashboard
+      </a>
+
+      <div class="menu-group-label">Operations</div>
+      <a class="menu-item" onclick="switchTab('queue')">
+        <span>📅</span> Bookings / Tokens
+      </a>
+      <a class="menu-item" onclick="switchTab('services')">
+        <span>⏱️</span> Schedule
+      </a>
+      <a class="menu-item" onclick="switchTab('unavailability')">
+        <span>🚫</span> Unavailability
+      </a>
+      <a class="menu-item" onclick="switchTab('chat')" id="menu-chat">
+        <span>💬</span> Alerts / Chat
+        <span class="menu-badge" id="chat-badge">3</span>
+      </a>
+      <a class="menu-item" onclick="switchTab('visitors')">
+        <span>👥</span> Visitors
+      </a>
+
+      <div class="menu-group-label">Administration</div>
+      <a class="menu-item" onclick="switchTab('organization')">
+        <span>🏢</span> Organization
+      </a>
+      <a class="menu-item" href="/">
+        <span>🌐</span> Customer Queue Portal
+      </a>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">AD</div>
+      <div class="user-details">
+        <div class="user-name" id="sidebar-username">Admin Officer</div>
+        <div class="user-role" id="sidebar-userrole">Super Administrator</div>
+      </div>
+      <button class="btn-logout" onclick="logout()" title="Logout">🚪</button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="main-wrapper">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-title">
+        <h1 id="page-title">Services</h1>
+      </div>
+
+      <div class="topbar-actions">
+        <button class="btn-secondary" onclick="alert('Sorting services alphabetically...')">
+          Sort ⬍
+        </button>
+        <button class="btn-primary" onclick="addNewServiceModal()">
+          + Add New Service
+        </button>
+      </div>
+    </header>
+
+    <!-- Sub-tabs Bar matching Screen 2 -->
+    <div class="tabs-bar">
+      <div class="tab-item active" id="subtab-services" onclick="switchTab('services')">Service Offered</div>
+      <div class="tab-item" id="subtab-queue" onclick="switchTab('queue')">Counters & Live Queue</div>
+      <div class="tab-item" id="subtab-analytics" onclick="switchTab('analytics')">Queue Analytics</div>
+      <div class="tab-item" onclick="window.location.href='/'">Customer View ↗</div>
+    </div>
+
+    <!-- Content Body -->
+    <div class="content-body">
+      <!-- VIEW 1: Services & Profiles Grid (Matching Screen 2) -->
+      <section id="view-services">
+        <div class="services-grid" id="services-grid">
+          <!-- Service Profile Card 1 -->
+          <div class="service-profile-card">
+            <div>
+              <div class="card-top">
+                <div class="service-title">Pediatrician</div>
+                <span class="service-badge">Healthcare</span>
+              </div>
+              <div class="service-desc">specializes in the care of infants, children, and adolescents with preventive health maintenance.</div>
+              <div class="service-location">
+                <span>📍 Apollo Center, Tambaram</span>
+                <span class="location-tag">+2</span>
+              </div>
+            </div>
+            <div class="card-actions">
+              <button class="btn-card-action" onclick="alert('Managing pediatrician scheduling...')">Configure</button>
+              <button class="btn-card-action primary" onclick="bookTokenForService(2, 'Pediatrician')">Book Token</button>
+            </div>
+          </div>
+
+          <!-- Service Profile Card 2 -->
+          <div class="service-profile-card">
+            <div>
+              <div class="card-top">
+                <div class="service-title">Banking & Accounts</div>
+                <span class="service-badge">Financial</span>
+              </div>
+              <div class="service-desc">Cash deposits, tuition fees, account statement generation, and student clearance services.</div>
+              <div class="service-location">
+                <span>📍 Finance Block, Ground Floor</span>
+                <span class="location-tag">Counter 1</span>
+              </div>
+            </div>
+            <div class="card-actions">
+              <button class="btn-card-action" onclick="alert('Configuring finance counter...')">Configure</button>
+              <button class="btn-card-action primary" onclick="bookTokenForService(1, 'Banking & Accounts')">Book Token</button>
+            </div>
+          </div>
+
+          <!-- Service Profile Card 3 -->
+          <div class="service-profile-card">
+            <div>
+              <div class="card-top">
+                <div class="service-title">Customer & Student Support</div>
+                <span class="service-badge">Administration</span>
+              </div>
+              <div class="service-desc">Bonafide certificate issuance, student records, general inquiries, and ID verification.</div>
+              <div class="service-location">
+                <span>📍 Admin Block, Room 102</span>
+                <span class="location-tag">Desk 3</span>
+              </div>
+            </div>
+            <div class="card-actions">
+              <button class="btn-card-action" onclick="alert('Configuring support desk...')">Configure</button>
+              <button class="btn-card-action primary" onclick="bookTokenForService(3, 'Customer Support')">Book Token</button>
+            </div>
+          </div>
+
+          <!-- Service Profile Card 4 -->
+          <div class="service-profile-card">
+            <div>
+              <div class="card-top">
+                <div class="service-title">General Physician</div>
+                <span class="service-badge">Healthcare</span>
+              </div>
+              <div class="service-desc">Routine medical check-ups, diagnostic testing consultations, and prescription renewals.</div>
+              <div class="service-location">
+                <span>📍 Apollo Center, Tambaram</span>
+                <span class="location-tag">OPD-1</span>
+              </div>
+            </div>
+            <div class="card-actions">
+              <button class="btn-card-action">Configure</button>
+              <button class="btn-card-action primary" onclick="bookTokenForService(2, 'General Physician')">Book Token</button>
+            </div>
+          </div>
+
+          <!-- Service Profile Card 5 -->
+          <div class="service-profile-card">
+            <div>
+              <div class="card-top">
+                <div class="service-title">Document Verification</div>
+                <span class="service-badge">Academic</span>
+              </div>
+              <div class="service-desc">Official transcript attestation, admission document checks, and scholarship clearance.</div>
+              <div class="service-location">
+                <span>📍 Registrar Office, 2nd Floor</span>
+                <span class="location-tag">Room 204</span>
+              </div>
+            </div>
+            <div class="card-actions">
+              <button class="btn-card-action">Configure</button>
+              <button class="btn-card-action primary" onclick="bookTokenForService(3, 'Document Verification')">Book Token</button>
+            </div>
+          </div>
+
+          <!-- Service Profile Card 6 -->
+          <div class="service-profile-card">
+            <div>
+              <div class="card-top">
+                <div class="service-title">Cardiology Consultation</div>
+                <span class="service-badge">Specialist</span>
+              </div>
+              <div class="service-desc">Cardiovascular health assessments, ECG evaluations, and specialized clinical consultation.</div>
+              <div class="service-location">
+                <span>📍 Specialty Wing, Tower B</span>
+                <span class="location-tag">+3</span>
+              </div>
+            </div>
+            <div class="card-actions">
+              <button class="btn-card-action">Configure</button>
+              <button class="btn-card-action primary" onclick="bookTokenForService(2, 'Cardiology')">Book Token</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 2: Live Queue & Counters Management -->
+      <section id="view-queue" style="display:none;">
+        <div class="ops-split">
+          <!-- Left: Call Next Console -->
+          <div class="panel-box">
+            <div class="panel-header">
+              <div class="panel-title">Staff Calling Desk</div>
+              <button class="btn-secondary" onclick="playChimeSound()">🔊 Test Chime</button>
+            </div>
+
+            <div class="call-stage">
+              <div class="stage-sub">Now Serving Customer</div>
+              <div class="stage-token" id="stage-token-display">A-014</div>
+              <div style="font-size:0.85rem; color:#94a3b8; margin-bottom:16px;">Assigned to <strong>Counter 1</strong></div>
+
+              <button class="btn-stage-call" onclick="callNextTokenAPI()">
+                📢 Call Next Customer
+              </button>
+
+              <div class="stage-row">
+                <button class="btn-stage-sub" onclick="alert('Token marked as completed!')">✅ Complete</button>
+                <button class="btn-stage-sub" onclick="alert('Token skipped.')">⏭️ Skip Customer</button>
+              </div>
+            </div>
+
+            <div style="margin-top:20px;">
+              <div class="panel-title" style="font-size:0.92rem; margin-bottom:10px;">Service Counters</div>
+              <table class="styled-table">
+                <thead>
+                  <tr>
+                    <th>Counter</th>
+                    <th>Status</th>
+                    <th>Toggle</th>
+                  </tr>
+                </thead>
+                <tbody id="counters-tbody">
+                  <tr>
+                    <td><strong>Counter 1</strong> (Banking)</td>
+                    <td><span class="status-badge active" id="db-c1-status">● Active</span></td>
+                    <td><button class="btn-card-action" style="padding:2px 8px; font-size:0.75rem;" onclick="toggleCounterStatus(1)">Toggle</button></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Counter 2</strong> (Healthcare)</td>
+                    <td><span class="status-badge active" id="db-c2-status">● Active</span></td>
+                    <td><button class="btn-card-action" style="padding:2px 8px; font-size:0.75rem;" onclick="toggleCounterStatus(2)">Toggle</button></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Counter 3</strong> (Support)</td>
+                    <td><span class="status-badge active" id="db-c3-status">● Active</span></td>
+                    <td><button class="btn-card-action" style="padding:2px 8px; font-size:0.75rem;" onclick="toggleCounterStatus(3)">Toggle</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Right: Live Queue Table -->
+          <div class="panel-box">
+            <div class="panel-header">
+              <div class="panel-title">Active Queue Stream</div>
+              <button class="btn-secondary" onclick="fetchLiveQueueTable()">🔄 Refresh Stream</button>
+            </div>
+
+            <div style="overflow-x:auto;">
+              <table class="styled-table">
+                <thead>
+                  <tr>
+                    <th>Token</th>
+                    <th>Service</th>
+                    <th>Customer</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboard-queue-tbody">
+                  <tr>
+                    <td><strong>A-014</strong></td>
+                    <td>Banking & Accounts</td>
+                    <td>Arjun Kumar</td>
+                    <td><span class="status-badge waiting">WAITING</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>A-013</strong></td>
+                    <td>Banking & Accounts</td>
+                    <td>Priya Sharma</td>
+                    <td><span class="status-badge served">SERVED</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>B-008</strong></td>
+                    <td>Pediatrician</td>
+                    <td>Meena R</td>
+                    <td><span class="status-badge served">SERVED</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 4: Unavailability -->
+      <section id="view-unavailability" style="display:none;">
+        <div class="panel-box" style="max-width:860px;">
+          <div class="panel-header">
+            <div class="panel-title">🚫 Unavailability Management</div>
+            <button class="btn-primary" onclick="addUnavailability()">+ Mark Unavailable</button>
+          </div>
+          <p style="font-size:0.83rem;color:var(--slate-500);margin-bottom:18px;">Block specific counters or staff from serving during scheduled breaks, maintenance, or leaves.</p>
+          <table class="styled-table">
+            <thead>
+              <tr><th>Counter / Staff</th><th>Reason</th><th>From</th><th>Until</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody id="unavail-tbody">
+              <tr>
+                <td><strong>Counter 2</strong> (Healthcare)</td>
+                <td>Maintenance Break</td>
+                <td>Today 1:00 PM</td>
+                <td>Today 2:30 PM</td>
+                <td><span class="status-badge paused">● Blocked</span></td>
+                <td><button class="btn-card-action" style="padding:3px 10px;font-size:0.75rem;" onclick="removeUnavailability(this)">Remove</button></td>
+              </tr>
+              <tr>
+                <td><strong>Dr. Priya S.</strong> (Pediatrician)</td>
+                <td>Conference Leave</td>
+                <td>Nov 14 9:00 AM</td>
+                <td>Nov 14 5:00 PM</td>
+                <td><span class="status-badge paused">● Blocked</span></td>
+                <td><button class="btn-card-action" style="padding:3px 10px;font-size:0.75rem;" onclick="removeUnavailability(this)">Remove</button></td>
+              </tr>
+              <tr>
+                <td><strong>Counter 3</strong> (Support)</td>
+                <td>Lunch Break</td>
+                <td>Today 1:00 PM</td>
+                <td>Today 1:30 PM</td>
+                <td><span class="status-badge active">● Available</span></td>
+                <td><button class="btn-card-action" style="padding:3px 10px;font-size:0.75rem;" onclick="removeUnavailability(this)">Remove</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- VIEW 5: Alerts / Chat -->
+      <section id="view-chat" style="display:none;">
+        <div style="display:grid;grid-template-columns:320px 1fr;gap:20px;height:calc(100vh - 200px);">
+          <!-- Left: Conversations list -->
+          <div class="panel-box" style="display:flex;flex-direction:column;padding:0;overflow:hidden;">
+            <div style="padding:16px 18px;border-bottom:1px solid var(--slate-100);font-weight:800;font-size:0.95rem;">💬 Alerts &amp; Chat</div>
+            <div style="padding:10px 12px;border-bottom:1px solid var(--slate-100);">
+              <input type="text" placeholder="Search conversations..." style="width:100%;border:1px solid var(--slate-200);border-radius:8px;padding:7px 12px;font-size:0.82rem;outline:none;">
+            </div>
+            <div style="overflow-y:auto;flex:1;" id="chat-list">
+              <div class="chat-conv-item active" onclick="openChat('system','System Alerts','🔔')">
+                <div class="chat-conv-avatar">🔔</div>
+                <div class="chat-conv-info">
+                  <div class="chat-conv-name">System Alerts <span class="menu-badge" style="background:#ef4444;">2</span></div>
+                  <div class="chat-conv-last">Counter 2 offline warning</div>
+                </div>
+              </div>
+              <div class="chat-conv-item" onclick="openChat('arjun','Arjun Kumar','AK')">
+                <div class="chat-conv-avatar">AK</div>
+                <div class="chat-conv-info">
+                  <div class="chat-conv-name">Arjun Kumar <span class="menu-badge" style="background:#0284c7;">1</span></div>
+                  <div class="chat-conv-last">When is my turn please?</div>
+                </div>
+              </div>
+              <div class="chat-conv-item" onclick="openChat('priya','Priya Sharma','PS')">
+                <div class="chat-conv-avatar" style="background:#f0fdf4;color:#059669;">PS</div>
+                <div class="chat-conv-info">
+                  <div class="chat-conv-name">Priya Sharma</div>
+                  <div class="chat-conv-last">Thank you for the quick service!</div>
+                </div>
+              </div>
+              <div class="chat-conv-item" onclick="openChat('meena','Meena R.','MR')">
+                <div class="chat-conv-avatar" style="background:#fdf4ff;color:#9333ea;">MR</div>
+                <div class="chat-conv-info">
+                  <div class="chat-conv-name">Meena R.</div>
+                  <div class="chat-conv-last">Can I reschedule?</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Right: Chat window -->
+          <div class="panel-box" style="display:flex;flex-direction:column;padding:0;overflow:hidden;">
+            <div style="padding:14px 20px;border-bottom:1px solid var(--slate-100);display:flex;align-items:center;gap:12px;">
+              <div id="chat-header-avatar" style="width:36px;height:36px;border-radius:50%;background:#dbeafe;color:#1e40af;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.85rem;">🔔</div>
+              <div>
+                <div style="font-weight:800;font-size:0.95rem;" id="chat-header-name">System Alerts</div>
+                <div style="font-size:0.72rem;color:var(--slate-500);">Admin Notification Channel</div>
+              </div>
+            </div>
+            <div id="chat-messages" style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;">
+              <div class="chat-msg received"><div class="chat-bubble warn">⚠️ Counter 2 went offline at 1:05 PM. Tokens are being redirected to Counter 1.</div><div class="chat-time">1:05 PM</div></div>
+              <div class="chat-msg received"><div class="chat-bubble warn">⏱️ Average wait time exceeded 10 minutes at Healthcare desk. Consider adding capacity.</div><div class="chat-time">1:22 PM</div></div>
+              <div class="chat-msg sent"><div class="chat-bubble primary">Counter 2 is under maintenance. Expected back at 2:30 PM.</div><div class="chat-time">1:25 PM</div></div>
+            </div>
+            <div style="padding:14px 18px;border-top:1px solid var(--slate-100);display:flex;gap:10px;">
+              <input type="text" id="chat-input" placeholder="Type a message or alert..." style="flex:1;border:1px solid var(--slate-200);border-radius:10px;padding:10px 14px;font-size:0.85rem;outline:none;">
+              <button class="btn-primary" onclick="sendChatMsg()" style="padding:10px 18px;">Send</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 6: Visitors -->
+      <section id="view-visitors" style="display:none;">
+        <div class="panel-box" style="max-width:1000px;">
+          <div class="panel-header">
+            <div class="panel-title">👥 Visitor Log</div>
+            <div style="display:flex;gap:10px;">
+              <input type="text" placeholder="Search visitor..." style="border:1px solid var(--slate-200);border-radius:8px;padding:7px 12px;font-size:0.82rem;outline:none;">
+              <button class="btn-primary" onclick="addVisitor()">+ Check In</button>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px;">
+            <div class="metric-card"><small>Today's Visitors</small><h3 id="vis-total">42</h3><span>↑ 8 from yesterday</span></div>
+            <div class="metric-card"><small>Currently Inside</small><h3 id="vis-inside">7</h3><span>● Active visits</span></div>
+            <div class="metric-card"><small>Avg Visit Duration</small><h3>12 min</h3><span>⏱ Well under limit</span></div>
+          </div>
+          <table class="styled-table">
+            <thead>
+              <tr><th>#</th><th>Name</th><th>Purpose</th><th>Counter / Dept</th><th>Check-In</th><th>Check-Out</th><th>Status</th></tr>
+            </thead>
+            <tbody id="visitors-tbody">
+              <tr><td>1</td><td><strong>Arjun Kumar</strong></td><td>Banking Inquiry</td><td>Counter 1</td><td>9:15 AM</td><td>9:28 AM</td><td><span class="status-badge served">Completed</span></td></tr>
+              <tr><td>2</td><td><strong>Meena Ravi</strong></td><td>Doctor Consultation</td><td>Pediatrician</td><td>10:02 AM</td><td>—</td><td><span class="status-badge serving">In Progress</span></td></tr>
+              <tr><td>3</td><td><strong>Ravi Shankar</strong></td><td>Document Verification</td><td>Registrar</td><td>10:45 AM</td><td>11:00 AM</td><td><span class="status-badge served">Completed</span></td></tr>
+              <tr><td>4</td><td><strong>Priya Nair</strong></td><td>Customer Support</td><td>Counter 3</td><td>11:15 AM</td><td>—</td><td><span class="status-badge serving">In Progress</span></td></tr>
+              <tr><td>5</td><td><strong>Kiran Das</strong></td><td>General Check-up</td><td>General OPD</td><td>11:40 AM</td><td>12:05 PM</td><td><span class="status-badge served">Completed</span></td></tr>
+              <tr><td>6</td><td><strong>Sumita Roy</strong></td><td>Cardiology</td><td>Specialist Wing</td><td>12:20 PM</td><td>—</td><td><span class="status-badge waiting">Waiting</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- VIEW 7: Organization -->
+      <section id="view-organization" style="display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:1000px;">
+          <div class="panel-box">
+            <div class="panel-header">
+              <div class="panel-title">🏢 Organization Profile</div>
+              <button class="btn-secondary" onclick="alert('Edit mode enabled.')">✏️ Edit</button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--primary-soft);border-radius:12px;">
+                <div style="width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#10b981,#0284c7);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.6rem;">🏥</div>
+                <div>
+                  <div style="font-weight:800;font-size:1.05rem;">SmartWait Clinic</div>
+                  <div style="font-size:0.78rem;color:var(--slate-500);">Apollo Center, Tambaram, Chennai</div>
+                </div>
+              </div>
+              <div class="org-field"><label>Organization Name</label><input value="SmartWait Clinic" class="org-input"></div>
+              <div class="org-field"><label>Branch / Location</label><input value="Apollo Center, Tambaram" class="org-input"></div>
+              <div class="org-field"><label>Admin Email</label><input value="admin@smartwait.in" class="org-input"></div>
+              <div class="org-field"><label>Contact Number</label><input value="+91 98765 43210" class="org-input"></div>
+              <div class="org-field"><label>Operating Hours</label><input value="Mon-Sat  9:00 AM – 6:00 PM" class="org-input"></div>
+              <div class="org-field"><label>Time Zone</label><input value="Asia/Kolkata (IST +5:30)" class="org-input"></div>
+              <button class="btn-primary" style="margin-top:4px;" onclick="alert('Organization profile saved!')">💾 Save Changes</button>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:20px;">
+            <div class="panel-box">
+              <div class="panel-header"><div class="panel-title">👤 Staff Members</div><button class="btn-primary" onclick="alert('Add staff member flow...')">+ Add Staff</button></div>
+              <table class="styled-table">
+                <thead><tr><th>Name</th><th>Role</th><th>Counter</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>Dr. Priya S.</strong></td><td>Physician</td><td>Counter 2</td><td><span class="status-badge active">● Active</span></td></tr>
+                  <tr><td><strong>Rajan T.</strong></td><td>Cashier</td><td>Counter 1</td><td><span class="status-badge active">● Active</span></td></tr>
+                  <tr><td><strong>Sneha M.</strong></td><td>Support Desk</td><td>Counter 3</td><td><span class="status-badge paused">⏸ Break</span></td></tr>
+                  <tr><td><strong>Karthik R.</strong></td><td>Administrator</td><td>All</td><td><span class="status-badge active">● Active</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="panel-box">
+              <div class="panel-header"><div class="panel-title">🔔 Notification Settings</div></div>
+              <div style="display:flex;flex-direction:column;gap:12px;">
+                <label class="toggle-row"><span>Email alerts when queue exceeds 10</span><input type="checkbox" checked class="toggle-chk"></label>
+                <label class="toggle-row"><span>SMS notification on token call</span><input type="checkbox" class="toggle-chk"></label>
+                <label class="toggle-row"><span>Browser push notifications</span><input type="checkbox" checked class="toggle-chk"></label>
+                <label class="toggle-row"><span>Daily analytics report (6 PM)</span><input type="checkbox" checked class="toggle-chk"></label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 3: Analytics Dashboard -->
+      <section id="view-analytics" style="display:none;">
+        <div class="metrics-row">
+          <div class="metric-card">
+            <small>Daily Customers Served</small>
+            <h3>148</h3>
+            <span>↑ 12% vs yesterday</span>
+          </div>
+          <div class="metric-card">
+            <small>Average Wait Time</small>
+            <h3>6.8 min</h3>
+            <span>↓ 2.1 min reduction</span>
+          </div>
+          <div class="metric-card">
+            <small>Active Service Counters</small>
+            <h3>3 / 3</h3>
+            <span>● 100% capacity</span>
+          </div>
+          <div class="metric-card">
+            <small>Customer Satisfaction</small>
+            <h3>98.4%</h3>
+            <span>★ 4.9/5 average</span>
+          </div>
+        </div>
+
+        <div class="panel-box">
+          <div class="panel-header">
+            <div class="panel-title">Queue Performance Curve (Hourly Traffic)</div>
+            <span style="font-size:0.78rem; color:var(--slate-500); font-weight:600;">9AM • 12PM • 3PM • 6PM Peak Trends</span>
+          </div>
+
+          <div style="width:100%; height:260px;">
+            <svg viewBox="0 0 700 220" width="100%" height="100%">
+              <defs>
+                <linearGradient id="dbGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#10b981" stop-opacity="0.3"></stop>
+                  <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"></stop>
+                </linearGradient>
+              </defs>
+              <line x1="40" y1="180" x2="660" y2="180" stroke="#e2e8f0" stroke-width="1"></line>
+              <line x1="40" y1="110" x2="660" y2="110" stroke="#f1f5f9" stroke-width="1"></line>
+              <line x1="40" y1="40" x2="660" y2="40" stroke="#f1f5f9" stroke-width="1"></line>
+
+              <!-- Smooth Curve -->
+              <path d="M 60,150 C 150,120 220,50 280,50 C 350,50 420,130 490,100 C 560,70 610,30 650,30 L 650,180 L 60,180 Z" fill="url(#dbGrad)"></path>
+              <path d="M 60,150 C 150,120 220,50 280,50 C 350,50 420,130 490,100 C 560,70 610,30 650,30" fill="none" stroke="#10b981" stroke-width="4"></path>
+
+              <circle cx="60" cy="150" r="6" fill="#10b981" stroke="#fff" stroke-width="3"></circle>
+              <circle cx="280" cy="50" r="6" fill="#10b981" stroke="#fff" stroke-width="3"></circle>
+              <circle cx="490" cy="100" r="6" fill="#10b981" stroke="#fff" stroke-width="3"></circle>
+              <circle cx="650" cy="30" r="6" fill="#10b981" stroke="#fff" stroke-width="3"></circle>
+
+              <text x="50" y="204" font-size="12" fill="#64748b" font-weight="700">9 AM</text>
+              <text x="265" y="204" font-size="12" fill="#64748b" font-weight="700">12 PM (Peak)</text>
+              <text x="480" y="204" font-size="12" fill="#64748b" font-weight="700">3 PM</text>
+              <text x="635" y="204" font-size="12" fill="#64748b" font-weight="700">6 PM</text>
+            </svg>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    let activeTab = 'services';
+    let currentToken = 'A-014';
+    let audioCtx = null;
+
+    const ALL_VIEWS = ['services','queue','analytics','unavailability','chat','visitors','organization'];
+
+    function switchTab(tabId) {
+      activeTab = tabId;
+      ALL_VIEWS.forEach(id => {
+        const el = document.getElementById('view-' + id);
+        if (el) el.style.display = (id === tabId) ? 'block' : 'none';
+      });
+
+      // Sub-tabs bar highlight
+      ['services','queue','analytics'].forEach(id => {
+        const el = document.getElementById('subtab-' + id);
+        if (el) el.className = 'tab-item' + (id === tabId ? ' active' : '');
+      });
+
+      // Sidebar highlight — remove active from all, add to clicked
+      document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+      const clicked = event && event.currentTarget;
+      if (clicked) clicked.classList.add('active');
+
+      const titleMap = {
+        'services':       'Services & Service Profiles',
+        'queue':          'Live Queue Stream & Calling Console',
+        'analytics':      'Queue Analytics & Performance',
+        'unavailability': 'Unavailability Management',
+        'chat':           'Alerts & Chat',
+        'visitors':       'Visitor Log',
+        'organization':   'Organization Settings',
+      };
+      document.getElementById('page-title').textContent = titleMap[tabId] || tabId;
+
+      if (tabId === 'queue') fetchLiveQueueTable();
+      if (tabId === 'chat') {
+        // Clear badge when opening chat
+        const badge = document.getElementById('chat-badge');
+        if (badge) badge.style.display = 'none';
+      }
+    }
+
+    function playChimeSound() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const playTone = (freq, start, duration) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime + start);
+          gain.gain.setValueAtTime(0.3, audioCtx.currentTime + start);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + start + duration);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(audioCtx.currentTime + start);
+          osc.stop(audioCtx.currentTime + start + duration);
+        };
+        playTone(587.33, 0.0, 0.4);
+        playTone(880.00, 0.3, 0.7);
+      } catch (e) {}
+    }
+
+    async function callNextTokenAPI() {
+      playChimeSound();
+      try {
+        const res = await fetch('/api/queue/call-next', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        if (res.ok) {
+          const data = await res.json();
+          currentToken = data.token_code;
+        } else {
+          currentToken = 'A-014';
+        }
+      } catch (e) {
+        currentToken = 'A-014';
+      }
+
+      document.getElementById('stage-token-display').textContent = currentToken;
+
+      if ('speechSynthesis' in window) {
+        setTimeout(() => {
+          const utterance = new SpeechSynthesisUtterance(`Calling token ${currentToken}, please proceed to Counter 1.`);
+          window.speechSynthesis.speak(utterance);
+        }, 400);
+      }
+      fetchLiveQueueTable();
+    }
+
+    async function toggleCounterStatus(counterId) {
+      const badge = document.getElementById(`db-c${counterId}-status`);
+      const isCurrentlyActive = badge.textContent.includes('Active');
+      const newStatus = isCurrentlyActive ? 'paused' : 'active';
+
+      badge.className = `status-badge ${newStatus}`;
+      badge.textContent = isCurrentlyActive ? '⏸ Paused' : '● Active';
+
+      try {
+        await fetch(`/api/queue/counters/${counterId}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+      } catch (e) {}
+    }
+
+    async function fetchLiveQueueTable() {
+      try {
+        const res = await fetch('/api/queue/active?limit=10');
+        if (res.ok) {
+          const tokens = await res.json();
+          const tbody = document.getElementById('dashboard-queue-tbody');
+          if (tokens.length > 0) {
+            tbody.innerHTML = '';
+            tokens.forEach(t => {
+              const tr = document.createElement('tr');
+              let statusClass = 'waiting';
+              if (t.status === 'completed' || t.status === 'served') statusClass = 'served';
+              else if (t.status === 'called' || t.status === 'serving') statusClass = 'serving';
+              else if (t.status === 'skipped') statusClass = 'skipped';
+
+              tr.innerHTML = `
+                <td><strong>${t.token_code}</strong></td>
+                <td>${t.service_name}</td>
+                <td>${t.customer_name}</td>
+                <td><span class="status-badge ${statusClass}">${t.status.toUpperCase()}</span></td>
+              `;
+              tbody.appendChild(tr);
+            });
+          }
+        }
+      } catch (e) {}
+    }
+
+    async function bookTokenForService(serviceId, serviceName) {
+      const name = prompt(`Book appointment token for ${serviceName}. Enter customer name:`, 'Arjun Kumar');
+      if (!name) return;
+
+      try {
+        const res = await fetch('/api/queue/join', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            service_id: serviceId,
+            customer_name: name
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          alert(`🎉 Token ${data.token_code} successfully issued for ${serviceName}! Position: #${data.people_ahead + 1}, Wait: ~${data.estimated_wait_min} min.`);
+          switchTab('queue');
+        }
+      } catch (e) {
+        alert(`Token generated! Proceeding to queue.`);
+        switchTab('queue');
+      }
+    }
+
+    function addNewServiceModal() {
+      const name = prompt('Enter new service name:');
+      if (!name) return;
+      alert(`Service "${name}" added to configuration.`);
+    }
+
+    // ---- Unavailability helpers ----
+    function addUnavailability() {
+      const target = prompt('Counter or staff name to block:');
+      if (!target) return;
+      const reason = prompt('Reason (e.g. Maintenance, Leave):') || 'Maintenance';
+      const from   = prompt('From time (e.g. Today 2:00 PM):') || 'Now';
+      const until  = prompt('Until (e.g. Today 4:00 PM):') || 'TBD';
+      const tbody = document.getElementById('unavail-tbody');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${target}</strong></td><td>${reason}</td>
+        <td>${from}</td><td>${until}</td>
+        <td><span class="status-badge paused">● Blocked</span></td>
+        <td><button class="btn-card-action" style="padding:3px 10px;font-size:0.75rem;" onclick="removeUnavailability(this)">Remove</button></td>`;
+      tbody.prepend(tr);
+    }
+    function removeUnavailability(btn) {
+      if (confirm('Remove this unavailability block?')) btn.closest('tr').remove();
+    }
+
+    // ---- Chat helpers ----
+    const chatData = {
+      system: [
+        { dir:'received', cls:'warn', text:'⚠️ Counter 2 went offline at 1:05 PM. Tokens are being redirected to Counter 1.', time:'1:05 PM' },
+        { dir:'received', cls:'warn', text:'⏱️ Average wait time exceeded 10 minutes at Healthcare desk.', time:'1:22 PM' },
+        { dir:'sent',     cls:'primary', text:'Counter 2 is under maintenance. Expected back at 2:30 PM.', time:'1:25 PM' },
+      ],
+      arjun: [
+        { dir:'received', cls:'plain', text:'Hello, when is my turn please? I have token A-014.', time:'11:30 AM' },
+        { dir:'sent', cls:'primary', text:'Hi Arjun! You are next in queue — just 1 person ahead. Please wait at Counter 1.', time:'11:32 AM' },
+        { dir:'received', cls:'plain', text:'When is my turn please?', time:'11:45 AM' },
+      ],
+      priya: [
+        { dir:'received', cls:'plain', text:'I was served very quickly. Great system!', time:'10:15 AM' },
+        { dir:'received', cls:'plain', text:'Thank you for the quick service!', time:'10:16 AM' },
+      ],
+      meena: [
+        { dir:'received', cls:'plain', text:'Hello, can I reschedule my appointment to tomorrow?', time:'12:10 PM' },
+      ]
+    };
+    let activeChatId = 'system';
+
+    function openChat(id, name, avatar) {
+      activeChatId = id;
+      document.querySelectorAll('.chat-conv-item').forEach(el => el.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      document.getElementById('chat-header-name').textContent = name;
+      const av = document.getElementById('chat-header-avatar');
+      av.textContent = avatar;
+      renderMessages(id);
+    }
+
+    function renderMessages(id) {
+      const box = document.getElementById('chat-messages');
+      const msgs = chatData[id] || [];
+      box.innerHTML = msgs.map(m => `
+        <div class="chat-msg ${m.dir}">
+          <div class="chat-bubble ${m.cls}">${m.text}</div>
+          <div class="chat-time">${m.time}</div>
+        </div>`).join('');
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function sendChatMsg() {
+      const inp = document.getElementById('chat-input');
+      const text = inp.value.trim();
+      if (!text) return;
+      if (!chatData[activeChatId]) chatData[activeChatId] = [];
+      const now = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      chatData[activeChatId].push({ dir:'sent', cls:'primary', text, time: now });
+      renderMessages(activeChatId);
+      inp.value = '';
+      // Auto-reply simulation
+      setTimeout(() => {
+        chatData[activeChatId].push({ dir:'received', cls:'plain', text:'Got it, thank you!', time: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) });
+        renderMessages(activeChatId);
+      }, 1200);
+    }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && document.activeElement.id === 'chat-input') sendChatMsg();
+    });
+
+    // ---- Visitors helpers ----
+    function addVisitor() {
+      const name = prompt('Visitor name:');
+      if (!name) return;
+      const purpose = prompt('Purpose of visit:') || 'General Inquiry';
+      const dept = prompt('Counter / Department:') || 'Reception';
+      const now = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      const tbody = document.getElementById('visitors-tbody');
+      const rows = tbody.querySelectorAll('tr').length + 1;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${rows}</td><td><strong>${name}</strong></td><td>${purpose}</td><td>${dept}</td><td>${now}</td><td>—</td><td><span class="status-badge serving">In Progress</span></td>`;
+      tbody.prepend(tr);
+      const inside = document.getElementById('vis-inside');
+      inside.textContent = parseInt(inside.textContent) + 1;
+      const total = document.getElementById('vis-total');
+      total.textContent = parseInt(total.textContent) + 1;
+    }
+
+    function logout() {
+      localStorage.removeItem('smartwait_token');
+      localStorage.removeItem('smartwait_role');
+      window.location.href = '/login';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = localStorage.getItem('smartwait_user');
+      const role = localStorage.getItem('smartwait_role');
+      if (user) {
+        document.getElementById('sidebar-username').textContent = user.split('@')[0];
+        document.getElementById('sidebar-userrole').textContent = role ? role.toUpperCase() : 'Administrator';
+        document.getElementById('sidebar-avatar').textContent = user.substring(0, 2).toUpperCase();
+      }
+      fetchLiveQueueTable();
+      setInterval(() => {
+        if (activeTab === 'queue') fetchLiveQueueTable();
+      }, 4000);
+    });
+  </script>
+</body>
+</html>
+

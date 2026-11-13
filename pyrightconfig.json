@@ -1,0 +1,8 @@
+{
+  "venvPath": "smartwait/backend",
+  "venv": ".venv",
+  "extraPaths": [
+    "smartwait/backend",
+    "smartwait/backend/.venv/Lib/site-packages"
+  ]
+}
